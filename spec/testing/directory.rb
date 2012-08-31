@@ -1,16 +1,13 @@
 module Fargo
   class Directory
 
-    def self.root(root_path, &block)
-      begin
-        new(root_path, &block)
-      ensure
-        @structure = nil
-      end
+    def self.set_root(root_path, &block)
+      @structure = nil
+      new(root_path, &block)
     end
 
     def find(path)
-      structure[clean_path(path)]
+      Fargo::Directory.structure[Fargo::Directory::clean_path(path)]
     end
 
     def self.structure
@@ -26,11 +23,15 @@ module Fargo
       @mtime   = mtime
       @file    = file
 
-      Fargo::Directory.structures[@path] = self
+      Fargo::Directory.structure[@path] = self
     end
 
     def basename
-      @path.split('/').last
+      @path.split('/').last || ".."
+    end
+
+    def path
+      @path
     end
 
     def file?
