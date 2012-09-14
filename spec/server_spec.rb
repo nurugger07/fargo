@@ -72,7 +72,7 @@ describe Fargo do
     it "makes a directory and then change into it" do
       connection.mkdir("new_tmp")
       connection.chdir("new_tmp")
-      connection.getdir.should eq("new_tmp")
+      connection.getdir.should eq("/new_tmp")
     end
 
     it "raises an error if the directory doesn't exist" do

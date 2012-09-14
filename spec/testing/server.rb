@@ -1,4 +1,5 @@
 require 'net/ftp'
+require './spec/testing/directory'
 
 module Fargo
 
@@ -57,7 +58,12 @@ module Fargo
     end
 
     def chdir(dirname)
-      @current_path = dirname
+      directory = Fargo::Directory.find(dirname)
+      if directory
+        @current_path = dirname
+      else
+        raise Net::FTPReplyError
+      end
     end
 
     # Theses are private because they are not part of the
