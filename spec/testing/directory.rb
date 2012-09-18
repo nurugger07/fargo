@@ -7,7 +7,7 @@ module Fargo
     end
 
     def self.find(path)
-      Fargo::Directory.structure[Fargo::Directory::clean_path(path)]
+      structure[clean_path(path)]
     end
 
     def self.structure
@@ -19,12 +19,12 @@ module Fargo
     end
 
     def initialize(path, file = false, mtime = Time.now)
-      @path    = Fargo::Directory::clean_path(path)
+      @path    = klass.clean_path(path)
       @mtime   = mtime
       @file    = file
 
       unless basepath.empty?
-        unless Fargo::Directory.find(basepath)
+        unless klass.find(basepath)
           raise Errno::ENOENT
         end
       end
@@ -32,15 +32,19 @@ module Fargo
       add_to_structure
     end
 
+    def klass
+      self.class
+    end
+
     def add_to_structure
-      Fargo::Directory.structure[@path] = self
+      klass.structure[@path] = self
     end
 
     def remove_from_structure!
-      Fargo::Directory.structure.map do |key, file|
+      klass.structure.map do |key, file|
         unless file.root?
-          if file.path.spilt("/")[path_index] == basename
-            Fargo::Directory.structure.delete(path)
+          if file.path.split("/")[path_index] == basename
+            self.class.structure.delete(file.path)
           end
         end
       end
@@ -84,6 +88,7 @@ end
 
 # "/"
 # "/file.rb"
+# "/new_folder"
 # "/new_folder/file.rb"
 # "/new_folder/another_folder"
 # "/new_folder/another_folder/file.rb"

@@ -58,7 +58,6 @@ describe Fargo do
           folder.remove_from_structure!
           Fargo::Directory.structure.count.should eq(1)
         end
-
       end
 
       # it "remove an existing file"
@@ -68,7 +67,8 @@ describe Fargo do
       let!(:directory) { Fargo::Directory.new('existing_folder') }
 
       it "find an existing folder in the structure" do
-        Fargo::Directory.find('existing_folder').path.should eq('existing_folder')
+        Fargo::Directory.find('existing_folder')
+          .path.should eq('existing_folder')
       end
 
       it "does not return a folder if folder not found" do

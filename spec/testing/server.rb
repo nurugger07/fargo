@@ -31,6 +31,8 @@ module Fargo
       @host             = host || HOSTNAME
       @user             = user || USER
       @status           = "225 Data connection open; no transfer in progress"
+
+      Fargo::Directory.set_root("//")
     end
 
     def login(user = "anonymous", passwd = nil, acct = nil)
@@ -58,11 +60,10 @@ module Fargo
     end
 
     def chdir(dirname)
-      directory = Fargo::Directory.find(dirname)
-      if directory
-        @current_path = dirname
-      else
-        raise Net::FTPReplyError
+      begin
+        @current_path = find_directory_path(dirname)
+      rescue Net::FTPPermError => e
+        raise e
       end
     end
 
@@ -82,6 +83,11 @@ module Fargo
       @user = user
       "230 User logged in, proceed. Logged out if appropriate "
     end
+
+    def find_directory_path(dirname)
+      Fargo::Directory.find_dir(dirname).path || @current_path
+    end
+
   end
 
 end

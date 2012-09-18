@@ -64,19 +64,15 @@ describe Fargo do
 
     describe ".chdir" do
       it "should change the directory" do
+        connection.should_receive(:find_directory_path).with("tmp").and_return("tmp")
         connection.chdir("tmp")
         connection.getdir.should eq("/tmp")
       end
-    end
 
-    it "makes a directory and then change into it" do
-      connection.mkdir("new_tmp")
-      connection.chdir("new_tmp")
-      connection.getdir.should eq("/new_tmp")
-    end
-
-    it "raises an error if the directory doesn't exist" do
-      connection.chdir("no_dir_tmp").should raise_error(Net::FTPReplyError)
+      it "doesn't find the directory" do
+        connection.should_receive(:find_directory_path).with("no_dir_tmp")
+        connection.chdir("no_dir_tmp").should raise_error(Net::FTPPermError)
+      end
     end
   end
 end
