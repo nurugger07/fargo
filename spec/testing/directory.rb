@@ -6,16 +6,26 @@ module Fargo
       new(root_path, &block)
     end
 
-    def self.find(path)
-      structure[clean_path(path)]
-    end
-
     def self.structure
       @structure ||= {}
     end
 
     def self.clean_path(path)
       path.chomp('/')
+    end
+
+    def self.find(path)
+      structure[clean_path(path)]
+    end
+
+    def self.find_directory(path)
+      directory = find(path)
+      directory if directory && directory.folder?
+    end
+
+    def self.find_file(path)
+      file = find(path)
+      file if file && file.file?
     end
 
     def initialize(path, file = false, mtime = Time.now)
@@ -30,10 +40,6 @@ module Fargo
       end
 
       add_to_structure
-    end
-
-    def klass
-      self.class
     end
 
     def add_to_structure
@@ -68,6 +74,10 @@ module Fargo
       add_to_structure
     end
 
+    def klass
+      self.class
+    end
+
     def path
       @path
     end
@@ -85,11 +95,3 @@ module Fargo
     end
   end
 end
-
-# "/"
-# "/file.rb"
-# "/new_folder"
-# "/new_folder/file.rb"
-# "/new_folder/another_folder"
-# "/new_folder/another_folder/file.rb"
-# "/new_folder/another_folder/file2.rb"

@@ -4,9 +4,10 @@ require './spec/testing/directory'
 module Fargo
 
   class Net::FTP
+
     HOSTNAME = 'localhost'
     FTP_PORT = '21'
-    DEFAULT_BLOCKSIZE = 4096
+    DEFAULT_BLOCKSIZE = 1024
     USER = 'anonymous'
     CURRENT_PATH = ''
     CRLF = '\r\n'
@@ -31,8 +32,6 @@ module Fargo
       @host             = host || HOSTNAME
       @user             = user || USER
       @status           = "225 Data connection open; no transfer in progress"
-
-      Fargo::Directory.set_root("//")
     end
 
     def login(user = "anonymous", passwd = nil, acct = nil)
@@ -52,7 +51,7 @@ module Fargo
     end
 
     def mkdir(dirname)
-      dirname
+      add_directory(dirname).path
     end
 
     def getdir
@@ -60,15 +59,28 @@ module Fargo
     end
 
     def chdir(dirname)
-      begin
-        @current_path = find_directory_path(dirname)
-      rescue Net::FTPPermError => e
-        raise e
-      end
+      @current_path = find_directory_path(dirname)
     end
 
+    def nlst(dirname=nil)
+      ['new_binaryfile.gz']
+    end
+
+    def getbinaryfile(remotefile, localfile, blocksize = DEFAULT_BLOCKSIZE)
+      file = find_file(remotefile)
+      file ? file : "550 Requested action not taken. File unavailable"
+    end
+
+    alias :gettextfile :getbinaryfile
+
+    def putbinaryfile(localfile, remotefile = File.basename(localfile), blocksize = DEFAULT_BLOCKSIZE)
+      add_file("#{@current_path}/#{remotefile}")
+    end
+
+    alias :puttextfile :putbinaryfile
+
     # Theses are private because they are not part of the
-    # Net::FTP library
+    # Net::FTP library.
     private
 
     def anonymous_user(user)
@@ -84,10 +96,32 @@ module Fargo
       "230 User logged in, proceed. Logged out if appropriate "
     end
 
-    def find_directory_path(dirname)
-      Fargo::Directory.find_dir(dirname).path || @current_path
+    def add_directory(dirname)
+      Fargo::Directory.new(dirname)
     end
 
+    def add_file(filename)
+      Fargo::Directory.new(filename)
+      "200 OK, Data received."
+    end
+
+    def find_directory(dirname)
+      Fargo::Directory.find_directory(dirname)
+    end
+
+    def find_file(filename)
+      Fargo::Directory.find_file(filename)
+    end
+
+    def find_directory_path(dirname)
+      directory = find_directory(dirname)
+
+      if directory
+        directory.path
+      else
+        raise Net::FTPPermError
+      end
+    end
   end
 
 end
