@@ -1,4 +1,11 @@
 module Fargo
+
+  class NilDirectory
+    def path
+      raise Net::FTPPermError
+    end
+  end
+
   class Directory
 
     def self.set_root(root_path, &block)

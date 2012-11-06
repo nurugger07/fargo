@@ -1,5 +1,5 @@
 require 'spec_helper'
-require './spec/testing/directory'
+require './spec/support/directory'
 
 describe Fargo do
   let!(:root) { Fargo::Directory.set_root('//') }

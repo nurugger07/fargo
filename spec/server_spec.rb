@@ -1,6 +1,6 @@
 require 'spec_helper'
 require 'net/ftp'
-require './spec/testing/server'
+require './spec/support/server'
 
 describe Fargo do
   let!(:connection) { ::Net::FTP.open("localhost") }
@@ -54,19 +54,22 @@ describe Fargo do
     end
 
     describe "#chdir" do
+      let!(:directory) { Fargo::Directory.new("tmp") }
+      let!(:nil_directory) { Fargo::NilDirectory.new }
+
       it "should change the directory" do
-        connection.should_receive(:find_directory_path)
-          .with("tmp").and_return("tmp")
+        connection.should_receive(:find_directory)
+          .with("tmp").and_return(directory)
 
         connection.chdir("tmp")
         connection.getdir.should eq("/tmp")
       end
 
       it "doesn't find the directory" do
-        connection.should_receive(:find_directory_path)
-          .and_raise(Net::FTPPermError)
+        connection.should_receive(:find_directory)
+          .with("no_tmp_dir").and_return(nil_directory)
 
-        lambda { connection.chdir("no_dir_tmp") }
+        lambda { connection.chdir("no_tmp_dir") }
           .should raise_error(Net::FTPPermError)
       end
     end

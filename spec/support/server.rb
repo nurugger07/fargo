@@ -1,5 +1,5 @@
 require 'net/ftp'
-require './spec/testing/directory'
+require './spec/support/directory'
 
 module Fargo
 
@@ -106,7 +106,7 @@ module Fargo
     end
 
     def find_directory(dirname)
-      Fargo::Directory.find_directory(dirname)
+      Fargo::Directory.find_directory(dirname) || Fargo::NilDirectory.new
     end
 
     def find_file(filename)
@@ -114,13 +114,7 @@ module Fargo
     end
 
     def find_directory_path(dirname)
-      directory = find_directory(dirname)
-
-      if directory
-        directory.path
-      else
-        raise Net::FTPPermError
-      end
+      find_directory(dirname).path
     end
   end
 

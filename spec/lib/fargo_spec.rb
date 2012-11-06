@@ -8,4 +8,11 @@ describe Fargo do
         .should == "200 OK, Data received."
     end
   end
+
+  describe ".get" do
+    it "downloads a single file" do
+      Fargo.get("/remote/file.rb", "/local/file.rb")
+        .should == []
+    end
+  end
 end
