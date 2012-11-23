@@ -91,33 +91,33 @@ describe Fargo do
 
   describe "#getbinaryfile" do
     it "returns a fargo directory object" do
-      file = Fargo::Directory.new("binaryfile.gz")
-      connection.should_receive(:find_file)
-        .with("remote/binaryfile.gz").and_return(file)
+      Fargo::Directory.new("binaryfile.gz", file: true)
 
-      connection.getbinaryfile('remote/binaryfile.gz', 'binaryfile.gz')
-        .should == file
+      connection.getbinaryfile('binaryfile.gz', 'spec/fixtures/binaryfile.gz')
+        .path.should == File.open('spec/fixtures/binaryfile.gz').path
     end
 
     it "returns an error message when not found" do
-      connection.getbinaryfile('/binaryfile.gz', 'binaryfile.gz')
+      connection.getbinaryfile('remote/binaryfile.gz', 'binaryfile.gz')
         .should == "550 Requested action not taken. File unavailable"
     end
   end
 
   describe "#gettextfile" do
-    it "returns a fargo directory object" do
-      file = Fargo::Directory.new("textfile.txt")
-      connection.should_receive(:find_file)
-        .with("remote/textfile.txt").and_return(file)
+    context "a valid file exists" do
+      it "returns a fargo directory object" do
+        Fargo::Directory.new("textfile.txt", file: true)
 
-      connection.gettextfile('remote/textfile.txt', 'textfile.txt')
-        .should == file
+        connection.gettextfile('textfile.txt', 'spec/fixtures/textfile.txt')
+          .path.should == File.open('spec/fixtures/textfile.txt').path
+      end
     end
 
-    it "returns an error message when not found" do
-      connection.gettextfile('/textfile.txt', 'textfile.txt')
+    context "no file exists" do
+      it "returns an error message when not found" do
+        connection.gettextfile('remote/textfile.txt', 'textfile.txt')
         .should == "550 Requested action not taken. File unavailable"
+      end
     end
   end
 end

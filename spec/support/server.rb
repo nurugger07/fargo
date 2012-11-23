@@ -66,12 +66,39 @@ module Fargo
       ['new_binaryfile.gz']
     end
 
+    # This method gets a binary file
     def getbinaryfile(remotefile, localfile, blocksize = DEFAULT_BLOCKSIZE)
-      file = find_file(remotefile)
-      file ? file : "550 Requested action not taken. File unavailable"
+      find_remote_file(remotefile) ? open_or_create_file(remotefile, localfile) : error_550
     end
 
-    alias :gettextfile :getbinaryfile
+    def error_550
+      "550 Requested action not taken. File unavailable"
+    end
+
+    def open_or_create_file(remote_name, local_name)
+      File.open(local_name, "w") do |f|
+        f.write("Successfully downloaded #{remote_name}")
+      end
+      open(local_name)
+    end
+
+    def find_remote_file(remote_file)
+      Fargo::Directory.find_file(remote_file)
+    end
+
+    # This method gets a text file
+    def gettextfile(remotefile, localfile, blocksize = DEFAULT_BLOCKSIZE)
+      file = find_file(remotefile)
+      if file
+        local = File.open(localfile, "w") do |f|
+          f.write("Successfully downloaded #{remotefile}")
+          f.close
+        end
+        open(localfile)
+      else
+        "550 Requested action not taken. File unavailable"
+      end
+    end
 
     def putbinaryfile(localfile, remotefile = File.basename(localfile), blocksize = DEFAULT_BLOCKSIZE)
       add_file("#{@current_path}/#{remotefile}")
